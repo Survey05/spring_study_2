@@ -13,7 +13,8 @@ public class UserRouter {
   @Bean
   public RouterFunction<ServerResponse> userRoutes(UserHandler userHandler) {
     return RouterFunctions
-        .route(GET("/users").and(accept(org.springframework.http.MediaType.APPLICATION_JSON)), userHandler::getAllUsers)
-        .andRoute(GET("/users/{id}").and(accept(org.springframework.http.MediaType.APPLICATION_JSON)), userHandler::getUserById);
+        .route(RequestPredicates.GET("/users"), userHandler::getAllUsers)
+        .andRoute(RequestPredicates.GET("/users/{id}"), userHandler::getUserById)
+        .andRoute(RequestPredicates.POST("/users"), userHandler::createUser);
   }
 }

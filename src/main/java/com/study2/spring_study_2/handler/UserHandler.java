@@ -1,38 +1,36 @@
 package com.study2.spring_study_2.handler;
 
 import com.study2.spring_study_2.model.User;
+import com.study2.spring_study_2.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.server.ServerRequest;
-import org.springframework.web.reactive.function.server.ServerResponse;
-import reactor.core.publisher.Flux;
+import org.springframework.web.reactive.function.server.*;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-import java.util.Objects;
-
 @Component
+@RequiredArgsConstructor
 public class UserHandler {
 
-  private final List<User> users = List.of(
-      new User(1L, "홍길동", 25),
-      new User(2L, "김철수", 30)
-  );
+  private final UserRepository userRepository;
 
   public Mono<ServerResponse> getAllUsers(ServerRequest request) {
     return ServerResponse.ok()
         .contentType(MediaType.APPLICATION_JSON)
-        .body(Flux.fromIterable(users), User.class);
+        .body(userRepository.findAll(), User.class);
   }
 
   public Mono<ServerResponse> getUserById(ServerRequest request) {
     Long id = Long.valueOf(request.pathVariable("id"));
-    return Flux.fromIterable(users)
-        .filter(user -> Objects.equals(user.getId(), id))
-        .next()
-        .flatMap(user -> ServerResponse.ok()
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(user))
+    return userRepository.findById(id)
+        .flatMap(user -> ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(user))
         .switchIfEmpty(ServerResponse.notFound().build());
   }
+
+  public Mono<ServerResponse> createUser(ServerRequest request) {
+    return request.bodyToMono(User.class)
+        .flatMap(userRepository::save)
+        .flatMap(saved -> ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(saved));
+  }
 }
+

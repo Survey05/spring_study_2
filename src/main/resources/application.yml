@@ -1,2 +1,16 @@
 server:
   port: 8080
+
+spring:
+  r2dbc:
+    url: r2dbc:mariadb://localhost:3306/mydb
+    username: root
+    password: root
+  datasource:
+    url: jdbc:m://localhost:3306/mydb
+    username: root
+    password: root
+
+sql:
+  init:
+    mode: always
