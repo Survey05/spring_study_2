@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -56,5 +57,23 @@ public class UserHandler {
         )
         .switchIfEmpty(ServerResponse.notFound().build());
   }
+
+  public Mono<ServerResponse> getUsersByMinAge(ServerRequest request) {
+    int minAge = Integer.valueOf(request.pathVariable("minAge"));
+    Flux<User> users = userRepository.findByAgeGreaterThan(minAge);
+
+    return ServerResponse.ok()
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(users, User.class);
+  }
+
+  public Mono<ServerResponse> getUsersNameUppercase(ServerRequest request) {
+    return ServerResponse.ok()
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(userRepository.findAll()
+            .map(user -> {user.setName(user.getName().toUpperCase()); return user;}),
+        User.class);
+  }
+
 }
 
