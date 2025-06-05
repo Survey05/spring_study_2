@@ -32,5 +32,29 @@ public class UserHandler {
         .flatMap(userRepository::save)
         .flatMap(saved -> ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(saved));
   }
+
+  public Mono<ServerResponse> updateUser(ServerRequest request) {
+    Long id = Long.valueOf(request.pathVariable("id"));
+
+    return request.bodyToMono(User.class)
+        .flatMap(user -> userRepository.findById(Long.valueOf(id))
+            .flatMap(existingUser -> {
+              existingUser.setName(user.getName());
+              existingUser.setAge(user.getAge());
+              return userRepository.save(existingUser);
+            })
+        )
+        .flatMap(updateUser -> ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(updateUser))
+        .switchIfEmpty(ServerResponse.notFound().build());
+  }
+
+  public Mono<ServerResponse> deleteUser(ServerRequest request) {
+    Long id = Long.valueOf(request.pathVariable("id"));
+    return userRepository.findById(id)
+        .flatMap(existingUser -> userRepository.delete(existingUser)
+          .then(ServerResponse.ok().build())
+        )
+        .switchIfEmpty(ServerResponse.notFound().build());
+  }
 }
 

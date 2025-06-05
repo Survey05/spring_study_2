@@ -13,8 +13,12 @@ public class UserRouter {
   @Bean
   public RouterFunction<ServerResponse> userRoutes(UserHandler userHandler) {
     return RouterFunctions
-        .route(RequestPredicates.GET("/users"), userHandler::getAllUsers)
-        .andRoute(RequestPredicates.GET("/users/{id}"), userHandler::getUserById)
-        .andRoute(RequestPredicates.POST("/users"), userHandler::createUser);
+        .route()
+        .GET("/users", userHandler::getAllUsers)
+        .GET("/users/{id}", userHandler::getUserById)
+        .POST("/users", userHandler::createUser)
+        .PUT("/users/{id}", userHandler::updateUser)
+        .DELETE("/users/{id}", userHandler::deleteUser)
+        .build();
   }
 }
