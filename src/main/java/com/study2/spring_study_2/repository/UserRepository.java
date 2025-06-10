@@ -9,5 +9,6 @@ import reactor.core.publisher.Flux;
 public interface UserRepository extends ReactiveCrudRepository<User, Long> {
 
   Flux<User> findByAgeGreaterThan(int age);
+  Flux<User> findByName(String name);
 
 }

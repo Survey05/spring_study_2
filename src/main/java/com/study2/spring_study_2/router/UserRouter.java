@@ -19,6 +19,7 @@ public class UserRouter {
         .DELETE("/users/{id}", userHandler::deleteUser)
         .GET("/users/age/{minAge}", userHandler::getUsersByMinAge)
         .GET("/users/upper/case", userHandler::getUsersNameUppercase)
+        .GET("/users/name/{name}", userHandler::getUsersByName)
         .build();
   }
 }

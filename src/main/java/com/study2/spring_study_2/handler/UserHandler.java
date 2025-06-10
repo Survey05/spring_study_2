@@ -77,5 +77,22 @@ public class UserHandler {
         User.class);
   }
 
+  public Mono<ServerResponse> getUsersByName(ServerRequest request) {
+    String name = request.pathVariable("name");
+
+    Flux<User> users = userRepository.findByName(name);
+
+    return users.hasElements()
+        .flatMap(exists -> {
+          if (exists) {
+            return ServerResponse.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(users, User.class);
+          } else {
+            return Mono.error(new UserNotFoundException("user with name " + name + " not found"));
+          }
+        });
+
+  }
 }
 
