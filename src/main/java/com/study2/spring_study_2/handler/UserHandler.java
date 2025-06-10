@@ -1,5 +1,6 @@
 package com.study2.spring_study_2.handler;
 
+import com.study2.spring_study_2.exception.UserNotFoundException;
 import com.study2.spring_study_2.model.User;
 import com.study2.spring_study_2.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,9 +24,10 @@ public class UserHandler {
 
   public Mono<ServerResponse> getUserById(ServerRequest request) {
     Long id = Long.valueOf(request.pathVariable("id"));
+
     return userRepository.findById(id)
         .flatMap(user -> ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(user))
-        .switchIfEmpty(ServerResponse.notFound().build());
+        .switchIfEmpty(Mono.error(new UserNotFoundException("User with id " + id + " not found")));
   }
 
   public Mono<ServerResponse> createUser(ServerRequest request) {
