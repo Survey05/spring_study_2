@@ -20,6 +20,7 @@ public class UserRouter {
         .GET("/users/age/{minAge}", userHandler::getUsersByMinAge)
         .GET("/users/upper/case", userHandler::getUsersNameUppercase)
         .GET("/users/name/{name}", userHandler::getUsersByName)
+        .GET("/users/age-range/{min}/{max}", userHandler::getUsersByRange)
         .build();
   }
 }

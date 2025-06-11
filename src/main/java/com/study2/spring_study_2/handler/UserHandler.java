@@ -88,11 +88,32 @@ public class UserHandler {
             return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(users, User.class);
-          } else {
+          }
+          else {
             return Mono.error(new UserNotFoundException("user with name " + name + " not found"));
           }
         });
 
+    }
+
+  public Mono<ServerResponse> getUsersByRange(ServerRequest request) {
+    int min = Integer.valueOf(request.pathVariable("min"));
+    int max = Integer.valueOf(request.pathVariable("max"));
+
+    Flux<User> users = userRepository.findByAgeBetween(min, max);
+
+    return users.hasElements()
+        .flatMap(exists -> {
+          if (exists) {
+            return ServerResponse.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(users, User.class);
+          }
+          else {
+            return Mono.error(new UserNotFoundException("user with age " + min + " ~ " + max + " not found"));
+          }
+        });
   }
+
 }
 
