@@ -93,7 +93,6 @@ public class UserHandler {
             return Mono.error(new UserNotFoundException("user with name " + name + " not found"));
           }
         });
-
     }
 
   public Mono<ServerResponse> getUsersByRange(ServerRequest request) {
@@ -111,6 +110,43 @@ public class UserHandler {
           }
           else {
             return Mono.error(new UserNotFoundException("user with age " + min + " ~ " + max + " not found"));
+          }
+        });
+  }
+
+  public Mono<ServerResponse> getUsersStartingWith(ServerRequest request) {
+
+    String prefix = request.pathVariable("prefix");
+
+    Flux<User> users = userRepository.findByNameStartingWith(prefix);
+
+    return users.hasElements()
+        .flatMap(exisits -> {
+          if (exisits) {
+            return ServerResponse.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(users, User.class);
+          }
+          else {
+            return Mono.error(new UserNotFoundException("user starting with " + prefix + " not found"));
+          }
+        });
+  }
+
+  public Mono<ServerResponse> getUsersContainingWith(ServerRequest request) {
+    String keyword = request.pathVariable("keyword");
+
+    Flux<User> users = userRepository.findByNameContaining(keyword);
+
+    return users.hasElements()
+        .flatMap(exists -> {
+          if (exists) {
+            return ServerResponse.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(users, User.class);
+          }
+          else {
+            return Mono.error(new UserNotFoundException("user containing keyword " + keyword + " not found"));
           }
         });
   }

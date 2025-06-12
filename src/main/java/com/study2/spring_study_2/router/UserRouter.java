@@ -10,17 +10,21 @@ public class UserRouter {
 
   @Bean
   public RouterFunction<ServerResponse> userRoutes(UserHandler userHandler) {
-    return RouterFunctions
-        .route()
-        .GET("/users", userHandler::getAllUsers)
-        .GET("/users/{id}", userHandler::getUserById)
-        .POST("/users", userHandler::createUser)
-        .PUT("/users/{id}", userHandler::updateUser)
-        .DELETE("/users/{id}", userHandler::deleteUser)
-        .GET("/users/age/{minAge}", userHandler::getUsersByMinAge)
-        .GET("/users/upper/case", userHandler::getUsersNameUppercase)
-        .GET("/users/name/{name}", userHandler::getUsersByName)
-        .GET("/users/age-range/{min}/{max}", userHandler::getUsersByRange)
-        .build();
+
+    return RouterFunctions.nest(RequestPredicates.path("/users"), RouterFunctions.route()
+        .GET("", userHandler::getAllUsers)
+        .GET("/{id}", userHandler::getUserById)
+        .POST("", userHandler::createUser)
+        .PUT("/{id}", userHandler::updateUser)
+        .DELETE("/{id}", userHandler::deleteUser)
+        .GET("/age/{minAge}", userHandler::getUsersByMinAge)
+        .GET("/upper/case", userHandler::getUsersNameUppercase)
+        .GET("/name/{name}", userHandler::getUsersByName)
+        .GET("/age-range/{min}/{max}", userHandler::getUsersByRange)
+        .GET("/startwith/{prefix}", userHandler::getUsersStartingWith)
+        .GET("/contains/{keyword}", userHandler::getUsersContainingWith)
+        .build()
+    );
   }
+
 }
