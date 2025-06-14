@@ -13,6 +13,7 @@ public class UserRouter {
 
     return RouterFunctions.nest(RequestPredicates.path("/users"), RouterFunctions.route()
         .GET("", userHandler::getAllUsers)
+        .GET("/filter", userHandler::getUsersByBetweenOrderByAge)
         .GET("/{id}", userHandler::getUserById)
         .POST("", userHandler::createUser)
         .PUT("/{id}", userHandler::updateUser)

@@ -151,5 +151,35 @@ public class UserHandler {
         });
   }
 
+  public Mono<ServerResponse> getUsersByBetweenOrderByAge(ServerRequest request) {
+    Integer min = Integer.valueOf(request.queryParam("min").orElseThrow(() -> new RuntimeException("min query parameter is required")));
+    Integer max = Integer.valueOf(request.queryParam("max").orElseThrow(() -> new RuntimeException("max query parameter is required")));
+    String sort = request.queryParam("sort").orElse("asc");
+
+    Flux<User> users;
+
+    switch (sort.toLowerCase()) {
+      case "desc":
+        users = userRepository.findByAgeBetweenOrderByAgeDesc(min, max);
+        break;
+      case "asc":
+        users = userRepository.findByAgeBetweenOrderByAgeAsc(min, max);
+        break;
+      default: return Mono.error(new IllegalArgumentException("sort " + sort + " is not supported"));
+    }
+
+    return users.hasElements()
+        .flatMap(exists -> {
+          if (exists) {
+            return ServerResponse.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(users, User.class);
+          }
+          else {
+            return Mono.error(new UserNotFoundException("user with age " + min + " ~ " + max + " not found"));
+          }
+        });
+  }
+
 }
 

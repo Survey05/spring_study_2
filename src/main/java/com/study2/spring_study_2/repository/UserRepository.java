@@ -13,5 +13,7 @@ public interface UserRepository extends ReactiveCrudRepository<User, Long> {
   Flux<User> findByAgeBetween(int min, int max);
   Flux<User> findByNameStartingWith(String prefix);
   Flux<User> findByNameContaining(String keyword);
+  Flux<User> findByAgeBetweenOrderByAgeAsc(int min, int max);
+  Flux<User> findByAgeBetweenOrderByAgeDesc(int min, int max);
 
 }
