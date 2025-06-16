@@ -1,8 +1,8 @@
 package com.study2.spring_study_2.handler;
 
 import com.study2.spring_study_2.exception.UserNotFoundException;
-import com.study2.spring_study_2.model.User;
-import com.study2.spring_study_2.repository.UserRepository;
+import com.study2.spring_study_2.model.dto.UserDto;
+import com.study2.spring_study_2.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -10,124 +10,94 @@ import org.springframework.web.reactive.function.server.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@Component
 @RequiredArgsConstructor
+@Component
 public class UserHandler {
 
-  private final UserRepository userRepository;
+  private final UserService userService;
 
   public Mono<ServerResponse> getAllUsers(ServerRequest request) {
     return ServerResponse.ok()
         .contentType(MediaType.APPLICATION_JSON)
-        .body(userRepository.findAll(), User.class);
+        .body(userService.getAllUsers(), UserDto.class);
   }
 
   public Mono<ServerResponse> getUserById(ServerRequest request) {
     Long id = Long.valueOf(request.pathVariable("id"));
-
-    return userRepository.findById(id)
-        .flatMap(user -> ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(user))
-        .switchIfEmpty(Mono.error(new UserNotFoundException("User with id " + id + " not found")));
+    return userService.getUserById(id)
+        .flatMap(userDto -> ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(userDto));
   }
 
   public Mono<ServerResponse> createUser(ServerRequest request) {
-    return request.bodyToMono(User.class)
-        .flatMap(userRepository::save)
-        .flatMap(saved -> ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(saved));
+    return request.bodyToMono(UserDto.class)
+        .flatMap(userService::createUser)
+        .flatMap(userDto -> ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(userDto));
   }
 
   public Mono<ServerResponse> updateUser(ServerRequest request) {
     Long id = Long.valueOf(request.pathVariable("id"));
-
-    return request.bodyToMono(User.class)
-        .flatMap(user -> userRepository.findById(Long.valueOf(id))
-            .flatMap(existingUser -> {
-              existingUser.setName(user.getName());
-              existingUser.setAge(user.getAge());
-              return userRepository.save(existingUser);
-            })
-        )
-        .flatMap(updateUser -> ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(updateUser))
-        .switchIfEmpty(ServerResponse.notFound().build());
+    return request.bodyToMono(UserDto.class)
+        .flatMap(userDto -> userService.updateUser(id, userDto))
+        .flatMap(updatedUserDto -> ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(updatedUserDto));
   }
 
   public Mono<ServerResponse> deleteUser(ServerRequest request) {
     Long id = Long.valueOf(request.pathVariable("id"));
-    return userRepository.findById(id)
-        .flatMap(existingUser -> userRepository.delete(existingUser)
-          .then(ServerResponse.ok().build())
-        )
-        .switchIfEmpty(ServerResponse.notFound().build());
+    return userService.deleteUser(id)
+        .then(ServerResponse.ok().build());
   }
 
   public Mono<ServerResponse> getUsersByMinAge(ServerRequest request) {
-    int minAge = Integer.valueOf(request.pathVariable("minAge"));
-    Flux<User> users = userRepository.findByAgeGreaterThan(minAge);
-
+    int minAge = Integer.parseInt(request.pathVariable("minAge"));
     return ServerResponse.ok()
         .contentType(MediaType.APPLICATION_JSON)
-        .body(users, User.class);
+        .body(userService.getUsersByMinAge(minAge), UserDto.class);
   }
 
   public Mono<ServerResponse> getUsersNameUppercase(ServerRequest request) {
     return ServerResponse.ok()
         .contentType(MediaType.APPLICATION_JSON)
-        .body(userRepository.findAll()
-            .map(user -> {user.setName(user.getName().toUpperCase()); return user;}),
-        User.class);
+        .body(userService.getUsersNameUppercase(), UserDto.class);
   }
 
   public Mono<ServerResponse> getUsersByName(ServerRequest request) {
     String name = request.pathVariable("name");
-
-    Flux<User> users = userRepository.findByName(name);
+    Flux<UserDto> users = userService.getUsersByName(name);
 
     return users.hasElements()
         .flatMap(exists -> {
           if (exists) {
-            return ServerResponse.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(users, User.class);
-          }
-          else {
+            return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(users, UserDto.class);
+          } else {
             return Mono.error(new UserNotFoundException("user with name " + name + " not found"));
           }
         });
-    }
+  }
 
   public Mono<ServerResponse> getUsersByRange(ServerRequest request) {
-    int min = Integer.valueOf(request.pathVariable("min"));
-    int max = Integer.valueOf(request.pathVariable("max"));
-
-    Flux<User> users = userRepository.findByAgeBetween(min, max);
+    int min = Integer.parseInt(request.pathVariable("min"));
+    int max = Integer.parseInt(request.pathVariable("max"));
+    Flux<UserDto> users = userService.getUsersByAgeRange(min, max);
 
     return users.hasElements()
         .flatMap(exists -> {
           if (exists) {
-            return ServerResponse.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(users, User.class);
-          }
-          else {
+            return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(users, UserDto.class);
+          } else {
             return Mono.error(new UserNotFoundException("user with age " + min + " ~ " + max + " not found"));
           }
         });
   }
 
   public Mono<ServerResponse> getUsersStartingWith(ServerRequest request) {
-
     String prefix = request.pathVariable("prefix");
-
-    Flux<User> users = userRepository.findByNameStartingWith(prefix);
+    Flux<UserDto> users = userService.getUsersStartingWith(prefix);
 
     return users.hasElements()
-        .flatMap(exisits -> {
-          if (exisits) {
-            return ServerResponse.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(users, User.class);
-          }
-          else {
+        .flatMap(exists -> {
+          if (exists) {
+            return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(users, UserDto.class);
+          } else {
             return Mono.error(new UserNotFoundException("user starting with " + prefix + " not found"));
           }
         });
@@ -135,17 +105,13 @@ public class UserHandler {
 
   public Mono<ServerResponse> getUsersContainingWith(ServerRequest request) {
     String keyword = request.pathVariable("keyword");
-
-    Flux<User> users = userRepository.findByNameContaining(keyword);
+    Flux<UserDto> users = userService.getUsersContaining(keyword);
 
     return users.hasElements()
         .flatMap(exists -> {
           if (exists) {
-            return ServerResponse.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(users, User.class);
-          }
-          else {
+            return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(users, UserDto.class);
+          } else {
             return Mono.error(new UserNotFoundException("user containing keyword " + keyword + " not found"));
           }
         });
@@ -155,31 +121,15 @@ public class UserHandler {
     Integer min = Integer.valueOf(request.queryParam("min").orElseThrow(() -> new RuntimeException("min query parameter is required")));
     Integer max = Integer.valueOf(request.queryParam("max").orElseThrow(() -> new RuntimeException("max query parameter is required")));
     String sort = request.queryParam("sort").orElse("asc");
-
-    Flux<User> users;
-
-    switch (sort.toLowerCase()) {
-      case "desc":
-        users = userRepository.findByAgeBetweenOrderByAgeDesc(min, max);
-        break;
-      case "asc":
-        users = userRepository.findByAgeBetweenOrderByAgeAsc(min, max);
-        break;
-      default: return Mono.error(new IllegalArgumentException("sort " + sort + " is not supported"));
-    }
+    Flux<UserDto> users = userService.getUsersByAgeRangeSorted(min, max, sort);
 
     return users.hasElements()
         .flatMap(exists -> {
           if (exists) {
-            return ServerResponse.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(users, User.class);
-          }
-          else {
+            return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(users, UserDto.class);
+          } else {
             return Mono.error(new UserNotFoundException("user with age " + min + " ~ " + max + " not found"));
           }
         });
   }
-
 }
-

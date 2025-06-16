@@ -28,10 +28,12 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
 	implementation("org.mariadb:r2dbc-mariadb:1.1.4")
 	implementation("org.json:json:20250517")
+	implementation("org.mapstruct:mapstruct:1.5.5.Final")
 
 	runtimeOnly("com.mysql:mysql-connector-j")
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
+	annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("io.projectreactor:reactor-test")
