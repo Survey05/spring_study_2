@@ -1,0 +1,47 @@
+### /users (유저 전체 조회)
+GET http://localhost:8080/users
+
+### /users/{id} (아이디에 해당하는 유저만 조회)
+GET http://localhost:8080/users/1
+
+### /users (유저 생성)
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "name": "김예시",
+  "age": 40
+}
+
+### /users/{id} (유저 삭제)
+DELETE http://localhost:8080/users/1
+
+### /users/{id} (유저 수정)
+PUT http://localhost:8080/users/1
+Content-Type: application/json
+
+{
+  "name": "김예시",
+  "age": 20
+}
+
+### /users/page (유저 조회 페이징)
+GET http://localhost:8080/users/page?page=1&size=10
+
+### /users/filter (특정 범위의 나이인 유저 조회, 정렬 방법 정의 가능, 정렬 기본값은 오름차순)
+GET http://localhost:8080/users/filter?min=20&max=40&sort=desc
+
+### /users/age/{minAge} (특정 나이 이상의 유저 조회)
+GET http://localhost:8080/users/age/20
+
+### /users/name/{name} (이름으로 유저 조회, 아래는 '김예시'를 url 인코딩 한 것)
+GET http://localhost:8080/users/name/%EA%B9%80%EC%98%88%EC%8B%9C
+
+### /users/startwith/{prefix} (특정 글자로 시작하는 이름의 유저 조회, 아래는 '김'을 url 인코딩 한 것)
+GET http://localhost:8080/users/startwith/%EA%B9%80
+
+### /users/contains/{keyword} (특정 글자를 이름에 포함하는 유저 조회, 아래는 '예시'를 url 인코딩 한 것)
+GET http://localhost:8080/users/contains/%EC%98%88%EC%8B%9C
+
+### /users/check-name/{name} (특정 이름을 가진 유저가 존재하는지 여부 조회,  아래는 '김예시'를 url 인코딩 한 것)
+GET http://localhost:8080/users/check-name/%EA%B9%80%EC%98%88%EC%8B%9C

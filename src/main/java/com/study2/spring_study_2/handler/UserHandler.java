@@ -3,6 +3,7 @@ package com.study2.spring_study_2.handler;
 import com.study2.spring_study_2.exception.UserNotFoundException;
 import com.study2.spring_study_2.model.dto.UserDto;
 import com.study2.spring_study_2.service.UserService;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -54,12 +55,6 @@ public class UserHandler {
         .body(userService.getUsersByMinAge(minAge), UserDto.class);
   }
 
-  public Mono<ServerResponse> getUsersNameUppercase(ServerRequest request) {
-    return ServerResponse.ok()
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(userService.getUsersNameUppercase(), UserDto.class);
-  }
-
   public Mono<ServerResponse> getUsersByName(ServerRequest request) {
     String name = request.pathVariable("name");
     Flux<UserDto> users = userService.getUsersByName(name);
@@ -70,21 +65,6 @@ public class UserHandler {
             return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(users, UserDto.class);
           } else {
             return Mono.error(new UserNotFoundException("user with name " + name + " not found"));
-          }
-        });
-  }
-
-  public Mono<ServerResponse> getUsersByRange(ServerRequest request) {
-    int min = Integer.parseInt(request.pathVariable("min"));
-    int max = Integer.parseInt(request.pathVariable("max"));
-    Flux<UserDto> users = userService.getUsersByAgeRange(min, max);
-
-    return users.hasElements()
-        .flatMap(exists -> {
-          if (exists) {
-            return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(users, UserDto.class);
-          } else {
-            return Mono.error(new UserNotFoundException("user with age " + min + " ~ " + max + " not found"));
           }
         });
   }
@@ -129,6 +109,37 @@ public class UserHandler {
             return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(users, UserDto.class);
           } else {
             return Mono.error(new UserNotFoundException("user with age " + min + " ~ " + max + " not found"));
+          }
+        });
+  }
+
+  public  Mono<ServerResponse> isNameDuplicate(ServerRequest request) {
+    String name = request.pathVariable("name");
+    Mono<Boolean> exists = userService.isNameDuplicate(name);
+
+    return exists.flatMap(exist -> {
+      if (exist) {
+        return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(
+            Map.of("duplicate", exist));
+      } else {
+        return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(
+            Map.of("duplicate", exist));
+      }
+    });
+  }
+
+  public Mono<ServerResponse> getUsersWithPagination(ServerRequest request) {
+    Integer page = Integer.valueOf(request.queryParam("page").orElse("0"));
+    Integer size = Integer.valueOf(request.queryParam("size").orElse("10"));
+    Flux<UserDto> users = userService.getUsersWithPagination(page, size);
+
+    return users.hasElements()
+        .flatMap(exists -> {
+          if (exists) {
+            return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(users, UserDto.class);
+          }
+          else {
+            return Mono.error(new UserNotFoundException("user with page " + page + " not found"));
           }
         });
   }

@@ -11,11 +11,11 @@ public interface UserService {
   Mono<UserDto> updateUser(Long id, UserDto userDto);
   Mono<Void> deleteUser(Long id);
   Flux<UserDto> getUsersByMinAge(int minAge);
-  Flux<UserDto> getUsersNameUppercase();
   Flux<UserDto> getUsersByName(String name);
-  Flux<UserDto> getUsersByAgeRange(int min, int max);
   Flux<UserDto> getUsersStartingWith(String prefix);
   Flux<UserDto> getUsersContaining(String keyword);
   Flux<UserDto> getUsersByAgeRangeSorted(int min, int max, String sort);
+  Mono<Boolean> isNameDuplicate(String name);
+  Flux<UserDto> getUsersWithPagination(int page, int size);
 }
 

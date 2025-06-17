@@ -64,28 +64,10 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public Flux<UserDto> getUsersNameUppercase() {
-    return userRepository.findAll()
-        .map(user -> {
-          user.setName(user.getName().toUpperCase());
-          return user;
-        })
-        .map(userMapper::toDto);
-  }
-
-  @Override
   public Flux<UserDto> getUsersByName(String name) {
     return userRepository.findByName(name)
         .switchIfEmpty(
             Flux.error(new UserNotFoundException("User with name " + name + " not found")))
-        .map(userMapper::toDto);
-  }
-
-  @Override
-  public Flux<UserDto>  getUsersByAgeRange(int min, int max) {
-    return userRepository.findByAgeBetween(min, max)
-        .switchIfEmpty(Flux.error(new UserNotFoundException(
-            "User with age between " + min + " and " + max + " not found")))
         .map(userMapper::toDto);
   }
 
@@ -117,5 +99,18 @@ public class UserServiceImpl implements UserService {
       default:
         return Flux.error(new IllegalArgumentException("Invalid sort order: " + sort));
     }
+  }
+
+  @Override
+  public Mono<Boolean> isNameDuplicate(String name) {
+    return userRepository.existsByName(name);
+  }
+
+  @Override
+  public Flux<UserDto> getUsersWithPagination(int page, int size) {
+    return userRepository.findAll()
+        .skip((long) (page-1) * size)
+        .take(size)
+        .map(userMapper::toDto);
   }
 }
