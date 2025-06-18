@@ -5,12 +5,14 @@ import com.study2.spring_study_2.model.dto.UserDto;
 import com.study2.spring_study_2.service.UserService;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class UserHandler {
@@ -18,6 +20,7 @@ public class UserHandler {
   private final UserService userService;
 
   public Mono<ServerResponse> getAllUsers(ServerRequest request) {
+    log.info("[UserHandler] getAllUsers called");
     return ServerResponse.ok()
         .contentType(MediaType.APPLICATION_JSON)
         .body(userService.getAllUsers(), UserDto.class);
@@ -113,17 +116,17 @@ public class UserHandler {
         });
   }
 
-  public  Mono<ServerResponse> isNameDuplicate(ServerRequest request) {
+  public  Mono<ServerResponse> isNameDuplicated(ServerRequest request) {
     String name = request.pathVariable("name");
-    Mono<Boolean> exists = userService.isNameDuplicate(name);
+    Mono<Boolean> exists = userService.isNameDuplicated(name);
 
     return exists.flatMap(exist -> {
       if (exist) {
         return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(
-            Map.of("duplicate", exist));
+            Map.of("duplicated", exist));
       } else {
         return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(
-            Map.of("duplicate", exist));
+            Map.of("duplicated", exist));
       }
     });
   }

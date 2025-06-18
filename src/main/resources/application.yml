@@ -10,7 +10,17 @@ spring:
     url: jdbc:m://localhost:3306/mydb
     username: root
     password: root
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 sql:
   init:
     mode: always
+
+logging:
+  level:
+    root: INFO
+    com.study2.spring_study_2: DEBUG

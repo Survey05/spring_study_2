@@ -23,7 +23,7 @@ public class UserRouter {
         .GET("/name/{name}", userHandler::getUsersByName)
         .GET("/startwith/{prefix}", userHandler::getUsersStartingWith)
         .GET("/contains/{keyword}", userHandler::getUsersContainingWith)
-        .GET("/check-name/{name}", userHandler::isNameDuplicate)
+        .GET("/check-name/{name}", userHandler::isNameDuplicated)
         .build()
     );
   }

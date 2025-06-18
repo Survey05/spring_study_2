@@ -102,7 +102,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public Mono<Boolean> isNameDuplicate(String name) {
+  public Mono<Boolean> isNameDuplicated(String name) {
     return userRepository.existsByName(name);
   }
 

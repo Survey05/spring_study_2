@@ -29,6 +29,7 @@ dependencies {
 	implementation("org.mariadb:r2dbc-mariadb:1.1.4")
 	implementation("org.json:json:20250517")
 	implementation("org.mapstruct:mapstruct:1.5.5.Final")
+	implementation("org.springframework.kafka:spring-kafka")
 
 	runtimeOnly("com.mysql:mysql-connector-j")
 	compileOnly("org.projectlombok:lombok")

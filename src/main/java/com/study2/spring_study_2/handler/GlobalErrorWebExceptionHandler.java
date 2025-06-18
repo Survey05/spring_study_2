@@ -21,11 +21,6 @@ public class GlobalErrorWebExceptionHandler implements ErrorWebExceptionHandler 
 
   @Override
   public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
-    String path = exchange.getRequest().getURI().getPath();
-
-    if (path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs") || path.startsWith("/swagger-resources")) {
-      return Mono.error(ex);
-    }
 
     Map<String, Object> errorAttributes = new HashMap<>();
     HttpStatus status;
@@ -41,6 +36,8 @@ public class GlobalErrorWebExceptionHandler implements ErrorWebExceptionHandler 
 
     errorAttributes.put("message", ex.getMessage());
     errorAttributes.put("status", status.value());
+
+    log.error("[exception] {} - {}", errorAttributes.get("error"), ex.getMessage(), ex);
 
     exchange.getResponse().setStatusCode(status);
     exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
