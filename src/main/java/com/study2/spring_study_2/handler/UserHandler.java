@@ -3,6 +3,7 @@ package com.study2.spring_study_2.handler;
 import com.study2.spring_study_2.exception.UserNotFoundException;
 import com.study2.spring_study_2.model.dto.UserDto;
 import com.study2.spring_study_2.service.UserService;
+import java.time.Duration;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +61,7 @@ public class UserHandler {
 
   public Mono<ServerResponse> getUsersByName(ServerRequest request) {
     String name = request.pathVariable("name");
-    Flux<UserDto> users = userService.getUsersByName(name);
+    Flux<UserDto> users = userService.getUsersByName(name).cache(Duration.ofSeconds(5));
 
     return users.hasElements()
         .flatMap(exists -> {
@@ -74,7 +75,7 @@ public class UserHandler {
 
   public Mono<ServerResponse> getUsersStartingWith(ServerRequest request) {
     String prefix = request.pathVariable("prefix");
-    Flux<UserDto> users = userService.getUsersStartingWith(prefix);
+    Flux<UserDto> users = userService.getUsersStartingWith(prefix).cache(Duration.ofSeconds(5));
 
     return users.hasElements()
         .flatMap(exists -> {
@@ -88,7 +89,7 @@ public class UserHandler {
 
   public Mono<ServerResponse> getUsersContainingWith(ServerRequest request) {
     String keyword = request.pathVariable("keyword");
-    Flux<UserDto> users = userService.getUsersContaining(keyword);
+    Flux<UserDto> users = userService.getUsersContaining(keyword).cache(Duration.ofSeconds(5));
 
     return users.hasElements()
         .flatMap(exists -> {
@@ -104,7 +105,7 @@ public class UserHandler {
     Integer min = Integer.valueOf(request.queryParam("min").orElseThrow(() -> new RuntimeException("min query parameter is required")));
     Integer max = Integer.valueOf(request.queryParam("max").orElseThrow(() -> new RuntimeException("max query parameter is required")));
     String sort = request.queryParam("sort").orElse("asc");
-    Flux<UserDto> users = userService.getUsersByAgeRangeSorted(min, max, sort);
+    Flux<UserDto> users = userService.getUsersByAgeRangeSorted(min, max, sort).cache(Duration.ofSeconds(5));
 
     return users.hasElements()
         .flatMap(exists -> {
@@ -118,7 +119,7 @@ public class UserHandler {
 
   public  Mono<ServerResponse> isNameDuplicated(ServerRequest request) {
     String name = request.pathVariable("name");
-    Mono<Boolean> exists = userService.isNameDuplicated(name);
+    Mono<Boolean> exists = userService.isNameDuplicated(name).cache(Duration.ofSeconds(5));
 
     return exists.flatMap(exist -> {
       if (exist) {
@@ -134,7 +135,7 @@ public class UserHandler {
   public Mono<ServerResponse> getUsersWithPagination(ServerRequest request) {
     Integer page = Integer.valueOf(request.queryParam("page").orElse("0"));
     Integer size = Integer.valueOf(request.queryParam("size").orElse("10"));
-    Flux<UserDto> users = userService.getUsersWithPagination(page, size);
+    Flux<UserDto> users = userService.getUsersWithPagination(page, size).cache(Duration.ofSeconds(5)) ;
 
     return users.hasElements()
         .flatMap(exists -> {
