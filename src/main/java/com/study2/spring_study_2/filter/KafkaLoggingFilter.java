@@ -31,7 +31,7 @@ public class KafkaLoggingFilter implements WebFilter {
             .map(addr -> addr.getAddress().getHostAddress())
             .orElse("unknown"));
 
-    String logMsg = String.format("Request - method: %s, path: %s, clientIp: %s", method, path, clientIp);
+    String logMsg = String.format("[request] method: %s, path: %s, clientIp: %s", method, path, clientIp);
 
     return chain.filter(exchange)
         .doOnSuccess(unused -> {
